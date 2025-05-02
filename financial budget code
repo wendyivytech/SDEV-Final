@@ -1,0 +1,92 @@
+"""
+Author:         Wendolyn Gatica
+Date written:   4/26/25
+Assignment:     Final Project
+Short Desc:     financial budget
+"""
+
+import tkinter as tk
+#from tkinter import ttk
+
+#set default values---------------------------------------------
+#zero starting balance
+#budgets = budgetName : amountSpend, limit
+balance = 0
+budgets = {
+    "Shopping" : [0,50],
+    "Groceries" : [0,200],
+    "Utilities" : [0,200]}
+
+#define button functions-----------------------------------------
+def add_entry_func():
+    """creates new window in which user can add expense entry"""
+    global entry_window
+    entry_window = tk.Toplevel()
+    entry_window.title('New Expense')
+    entry_window.geometry('300x150')
+    
+    tk.Label(entry_window, text='Expense Category:').pack()
+    tk.Entry(entry_window, textvariable = category_ent ).pack()
+
+    tk.Label(entry_window, text='Amount:').pack()
+    tk.Entry(entry_window, textvariable = amount_ent).pack()
+
+    tk.Button(entry_window, text='Save', command = save_entry).pack()
+
+def save_entry():
+    global balance
+    category = category_ent.get()
+    amount = float(amount_ent.get())
+    budgets[category][0] = budgets[category][0] + amount
+    balance = balance - amount
+    bal_lbl_var.set("Balance: $" + str(balance))
+    entry_window.destroy()
+    
+def update_balance_func():
+    """creates new window in which user can add expense entry"""
+    global balance_window
+    balance_window = tk.Toplevel()
+    balance_window.title('Update Balance')
+    balance_window.geometry('300x150')
+    
+    tk.Label(balance_window, text='Balance:').pack()
+    tk.Entry(balance_window, textvariable = balance_ent).pack()
+
+    tk.Button(balance_window, text='Save', command = save_balance).pack()
+
+def save_balance():
+    global balance
+    balance = float(balance_ent.get())
+    bal_lbl_var.set("Balance: $" + str(balance))
+    balance_window.destroy()
+
+#main window-----------------------------------------------------
+window = tk.Tk()
+window.geometry('300x200')
+window.title('Personal Finances Budget')
+
+#set more variables
+category_ent = tk.StringVar()
+amount_ent = tk.StringVar()
+balance_ent = tk.StringVar()
+
+#arrange widgets--------------------------------------------------
+bal_lbl_var = tk.StringVar()
+bal_lbl_var.set("Balance: $" + str(balance))
+balance_lbl = tk.Label(window, textvariable = bal_lbl_var)
+balance_lbl.pack()
+
+#-----------------------------------
+#label variable with multiple lines, displaying budget caregories and limits
+#for key in range(len(budgets)):
+#    print( word, uniqueWords.get(word) )
+
+
+add_entry_btn = tk.Button(window, text='Add Entry', command = add_entry_func)
+add_entry_btn.pack(expand = True)
+
+update_bal_btn = tk.Button(window, text='Update Balance', command = update_balance_func).pack(expand = True)
+
+#run---------------------------------------------------------------
+window.mainloop()
+
