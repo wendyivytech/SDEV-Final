@@ -6,7 +6,7 @@ Short Desc:     financial budget
 """
 
 import tkinter as tk
-#from tkinter import ttk
+from tkinter import PhotoImage
 
 #set default values---------------------------------------------
 #zero starting balance
@@ -16,6 +16,7 @@ budgets = {
     "Shopping" : [0,50],
     "Groceries" : [0,200],
     "Utilities" : [0,200]}
+dic_txt = "\n"
 
 #define button functions-----------------------------------------
 def add_entry_func():
@@ -24,23 +25,50 @@ def add_entry_func():
     entry_window = tk.Toplevel()
     entry_window.title('New Expense')
     entry_window.geometry('300x150')
+    entry_window.configure(bg="pink")
     
-    tk.Label(entry_window, text='Expense Category:').pack()
-    tk.Entry(entry_window, textvariable = category_ent ).pack()
+    tk.Label(entry_window, text='Expense Category:', bg="pink").pack()
+    tk.Entry(entry_window, textvariable = category_ent, bg="pink").pack()
 
-    tk.Label(entry_window, text='Amount:').pack()
-    tk.Entry(entry_window, textvariable = amount_ent).pack()
+    tk.Label(entry_window, text='Amount:', bg="pink").pack()
+    tk.Entry(entry_window, textvariable = amount_ent, bg="pink").pack()
+    
+    tk.Label(entry_window, text='Limit:', bg="pink").pack()
+    tk.Entry(entry_window, textvariable = limit_ent, bg="pink").pack()
 
-    tk.Button(entry_window, text='Save', command = save_entry).pack()
+    tk.Button(entry_window, text='Save',bg="pink", command = save_entry).pack()
 
 def save_entry():
     global balance
+    global budgets
+    
     category = category_ent.get()
-    amount = float(amount_ent.get())
-    budgets[category][0] = budgets[category][0] + amount
+    
+    if category in budgets: #get entry plus amount already spent in budget
+        amount = float(amount_ent.get()) + budgets[category][0]
+    else:
+        amount = float(amount_ent.get())
+
+    if len(limit_ent.get()) != 0: #limit can be empty
+        limit = float(limit_ent.get())
+    elif category in budgets:
+        limit = budgets[category][1]
+    else:
+        limit = 0.0
+
+    budgets[category] = [amount, limit]
     balance = balance - amount
-    bal_lbl_var.set("Balance: $" + str(balance))
-    entry_window.destroy()
+
+    bal_lbl_var.set("Balance: $" + str(balance)) #new balance on window
+    dic_txt = "\n"
+    for key, value in budgets.items():
+            dic_txt += str(key)+": $"+str(value[0])+" spent of $"+str(value[1])+" limit\n"
+    dic_lbl_var.set(dic_txt)#new budget on window
+
+    category_ent.set("") #clear entry variables
+    amount_ent.set("")
+    limit_ent.set("")
+    entry_window.destroy() #close window
     
 def update_balance_func():
     """creates new window in which user can add expense entry"""
@@ -48,13 +76,15 @@ def update_balance_func():
     balance_window = tk.Toplevel()
     balance_window.title('Update Balance')
     balance_window.geometry('300x150')
+    balance_window.configure(bg="pink")
     
-    tk.Label(balance_window, text='Balance:').pack()
-    tk.Entry(balance_window, textvariable = balance_ent).pack()
+    tk.Label(balance_window, text='Balance:', bg="pink").pack()
+    tk.Entry(balance_window, textvariable = balance_ent, bg="pink").pack()
 
-    tk.Button(balance_window, text='Save', command = save_balance).pack()
+    tk.Button(balance_window, text='Save', bg="pink", command=save_balance).pack()
 
 def save_balance():
+    """updates the balance variable and updates the window"""
     global balance
     balance = float(balance_ent.get())
     bal_lbl_var.set("Balance: $" + str(balance))
@@ -62,31 +92,38 @@ def save_balance():
 
 #main window-----------------------------------------------------
 window = tk.Tk()
-window.geometry('300x200')
-window.title('Personal Finances Budget')
+window.geometry('300x500')
+window.title('Personal Budget')
+window.configure(bg="pink")
+
+#add image
+img = PhotoImage(file="main.png").subsample(3, 3)
+img_lbl  = tk.Label(window, image = img, borderwidth = 0).pack()
 
 #set more variables
 category_ent = tk.StringVar()
 amount_ent = tk.StringVar()
+limit_ent = tk.StringVar()
 balance_ent = tk.StringVar()
 
 #arrange widgets--------------------------------------------------
 bal_lbl_var = tk.StringVar()
 bal_lbl_var.set("Balance: $" + str(balance))
-balance_lbl = tk.Label(window, textvariable = bal_lbl_var)
-balance_lbl.pack()
+balance_lbl = tk.Label(window, textvariable = bal_lbl_var, width=30, fg="pink", bg="black").pack()
 
-#-----------------------------------
-#label variable with multiple lines, displaying budget caregories and limits
-#for key in range(len(budgets)):
-#    print( word, uniqueWords.get(word) )
+for key, value in budgets.items():
+	dic_txt += str(key)+": $"+str(value[0])+" spent of $"+str(value[1])+" limit\n"
+dic_lbl_var = tk.StringVar()
+dic_lbl_var.set(dic_txt)
+dic_txt_lbl = tk.Label(window, textvariable = dic_lbl_var, width=30, fg="pink", bg="black").pack(expand = True)
 
+add_entry_btn = tk.Button(window, text='Add Entry', bg="pink", width=12,
+                          command = add_entry_func).pack()
 
-add_entry_btn = tk.Button(window, text='Add Entry', command = add_entry_func)
-add_entry_btn.pack(expand = True)
+update_bal_btn = tk.Button(window, text='Update Balance', bg="pink", width=12,
+                           command = update_balance_func).pack()
 
-update_bal_btn = tk.Button(window, text='Update Balance', command = update_balance_func).pack(expand = True)
-
+footnote = tk.Label(window, text = "Update budgets list by adding entry", width=300, fg="white", bg="pink").pack(expand = True)
 #run---------------------------------------------------------------
 window.mainloop()
 
